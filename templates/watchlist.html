@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1 class="font-bold text-3xl md:text-5xl text-center mt-5">Your Watchlist</h1>
+    <div class="grid md:grid-cols-3 px-5 gap-4 mt-10">
+    {% for watch in data %}
+        <div class="border-2 border-black rounded-md py-2 flex flex-col items-center">
+            <div class="flex items-center">
+                <img class="w-[3rem] mr-5" src={{watch.coinImg}} alt={{watch.coinName}}>
+                <h1 class="text-3xl font-bold">{{watch.coinName}}</h1>
+            </div>
+            <div class="">
+                {% if watch.watchType == "bullish" %}
+                    <h1 class="text-2xl font-bold">Type: <span class="text-red-600 font-light">{{watch.watchType}}</span></h1>
+                {% else %}
+                    <h1 class="text-2xl font-bold">Type: <span class="text-green-600  font-light">{{watch.watchType}}</span></h1>
+                {% endif %}
+                <h1 class="text-2xl font-bold">Target: <span class="font-light">${{watch.watchTarget}}</span></h1>
+            </div>
+            <form action="/delete-watch/" method="post">
+                {% csrf_token %}
+                <input value={{watch.id}} name="watchId" class="hidden">
+                <button type="submit" class="bg-red-600 text-white px-2 py-1 text-xl rounded-md mt-5">Delete</button>
+            </form>
+        </div>
+    {% endfor %}
+    </div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block head %}
+{% endblock %}
+{% block content %}
+<div class="grid grid-cols-2 w-full mt-10">
+    <div class="w-full flex flex-col justify-center px-5">
+        <h1 class="text-2xl md:text-6xl font-bold text-gray-700 mb-5">Empowering Your Crypto Journey: Real-Time Tracking, Instant Notifications.</h1>
+        <p class="hidden md:block text-sm text-gray-500">MyCrypto is a free cryto tracking service, which allows you to add cryptos to watchlist and get email notification for price change.</p>
+        {% if request.user.is_authenticated %}
+        <a href="#" class="hidden md:block bg-[#E6A54B] px-2 py-2 text-white rounded-full w-[100%] md:w-[30%] my-10 text-base md:text-xl text-center">Get Started</a>
+        {% else %}
+        <a href="/user/signin" class="hidden md:block bg-[#E6A54B] px-2 py-2 text-white rounded-full w-[100%] md:w-[30%] my-10 text-base md:text-xl text-center">Get Started</a>
+        {% endif %}
+    </div>
+    <div class="">
+        {% load static %}
+        <img src="{% static '/cryptos.png' %}" alt="Bitcoin cover">
+    </div>
+</div>
+<div class="md:hidden px-5 mb-10">
+    <p class="text-sm text-gray-500 mb-5">MyCrypto is a free cryto tracking service, which allows you to add cryptos to watchlist and get email notification for price change.</p>
+    {% if request.user.is_authenticated %}
+        <a href="#" class="bg-[#E6A54B] px-2 py-2 text-white rounded-full w-[50%] my-10 text-base md:text-xl text-center">Get Started</a>
+    {% else %}
+        <a href="/user/signin" class="bg-[#E6A54B] px-2 py-2 text-white rounded-full w-[50%] my-10 text-base md:text-xl text-center">Get Started</a>
+    {% endif %}
+</div>
+<div class="px-5 overflow-auto" id="#crypto">
+<div class="flex items-center mb-10">
+    <h1 class=" text-xl md:text-5xl font-bold">Crypto Market</h1>
+    <h1 class=" text-base md:text-2xl font-bold ml-5"> - {{data|length}} cryptos</h1>
+</div>
+<div class="text-right">
+    <p class="text-[#E6A54B]">Updated every 1 hour</p>
+</div>
+<table class="table w-full">
+    <thead class="border-b-4 border-black">
+      <tr>
+        <th class="text-gray-600 text-xl">Rank</th>
+        <th class="text-gray-600 text-left text-xl pl-10">Name</th>
+        <th class="text-gray-600 text-left text-xl">Last Price</th>
+        <th class="text-gray-600 text-left text-xl w-[8rem]">24h %</th>
+        <th class="text-gray-600 text-left text-xl">Market Cap</th>
+        <th class="text-gray-600"></th>
+      </tr>
+    </thead>
+    <tbody>
+{% for i in data %}
+    <tr class="border-b-2">
+        {% load humanize %}
+        <th>{{i.market_cap_rank}}</th>
+        <td class="py-7">
+            <a href="/coins/{{i.symbol|upper}}/USD">
+                <div class="flex items-center ml-5">
+                    <div>  
+                        <img src={{i.image}} alt={{i.name}} class=" w-[2rem] md:w-[2.5rem]">
+                    </div>
+                    <p class="mx-2 text-xl font-semibold">{{i.name}}</p>
+                    <p class="font-bold text-gray-400 text-base mb-2">{{i.symbol|upper}}</p>
+                </div>
+            </a>
+        </td>
+        <td class="font-bold text-xl">${{i.current_price|intcomma}}</td>
+        {% if i.price_change_percentage_24h < 0 %}
+            <td class="text-xl text-red-600">{{i.price_change_percentage_24h|floatformat:2}}%</td>
+        {% else %}
+            <td class="text-xl text-green-600">+{{i.price_change_percentage_24h|floatformat:2}}%</td>
+        {% endif %}
+        <td class="font-bold text-xl">${{i.market_cap|intcomma}}</td>
+        {% if request.user.is_authenticated %}
+            <td><a type="button" class="ml-5 bg-[#272829] hover:bg-[#000000] text-white px-2 py-1 rounded-md" onclick="addToWishlist('{{ i.name }}', '{{ i.image }}','{{i.current_price}}');">Watchlist</a></td>
+        {% else %}
+            <td><a href="/user/signin" type="button" class="ml-5 bg-[#272829] hover:bg-[#000000] text-white px-2 py-1 rounded-md">Watchlist</a></td>
+        {% endif %}
+    </tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

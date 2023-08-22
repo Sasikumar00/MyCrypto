@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<script>
+  window.onload = function () {
+    let data = {{Coindata|safe}};
+    let pair = "{{Pairs|safe}}";
+    let btcUSDDps = [];
+    for(let i=0; i<data.length; i++) {
+      var dataDate = data[i].date;
+      btcUSDDps.push({ 
+        x: new Date(parseInt(dataDate.split("-")[0]),parseInt(dataDate.split("-")[1]-1),parseInt(dataDate.split("-")[2])), 
+        y: [ data[i].open, data[i].high, data[i].low, data[i].close ],
+        color: data[i].open < data[i].close ? "#77A034" : "#C0504E"
+      });
+    }
+    var chart = new CanvasJS.Chart("chartContainer", {
+      theme: "light2",
+      exportEnabled: true,
+      zoomEnabled: true,
+      title: {
+        text: pair
+      },
+      axisX: {
+        crosshair: {
+          enabled: true,
+          snapToDataPoint: true,
+          valueFormatString: "MMM DD, YYYY"
+        }
+      },
+      axisY: {
+        prefix: "$",
+        title: "Price",
+        crosshair: {
+          enabled: true,
+          snapToDataPoint: true,
+          valueFormatString: "$#,##0.00"
+        }
+      },
+      data: [{
+        type: "candlestick",
+        yValueFormatString: "$#,##0.00",
+        xValueFormatString: "MMM DD, YYYY",
+        risingColor: "#77A034",
+        fallingColor: "#C0504E",
+        dataPoints: btcUSDDps
+      }]
+    });
+    chart.render();
+  }
+</script>
+{% endblock %}
+
+{% block content %}
+{% load humanize %}
+<div class="px-3">
+  <div class="md:px-3 grid md:grid-cols-2 mb-10  mt-5">
+    <div class="flex">
+      <img src={{CoinInfo.image}} alt={{CoinInfo.name}} class="w-[30%] h-[50%] md:w-[50%] md:h-[80%]">
+      <div class="text-xl md:text-4xl mx-5 mt-3">
+        <h1 class="font-bold">{{CoinInfo.name}}<span class="font-bold text-slate-400 text-base ml-1 md:ml-0 md:text-xl">({{CoinInfo.symbol|upper}})</span></h1>
+        <h1 class="font-bold">Current Price: <span class="font-light ml-2">${{CoinInfo.current_price|intcomma}}</span></h1>
+        <h1 class="font-bold">Market Cap: <span class="font-light ml-2">${{CoinInfo.market_cap|intcomma}}</span></h1>
+      </div>
+    </div>
+    <div class="text-sm md:text-xl grid grid-cols-2 gap-4 mt-10 md:mt-0">
+      <div class="mr-5 md:mr-0">
+        <h1 class="font-bold flex flex-col">Total Supply: <span class="font-light">{{CoinInfo.total_supply|intcomma}}</span></h1>
+        {% if CoinInfo.price_change_percentage_24h < 0 %}
+          <h1 class="font-bold flex flex-col">Price Percentage 24h: <span class="font-light text-red-600">{{CoinInfo.price_change_percentage_24h|floatformat:2}}%</span></h1>
+        {% else %}
+          <h1 class="font-bold flex flex-col">Price Percentage 24h: <span class="font-light text-green-600">+{{CoinInfo.price_change_percentage_24h|floatformat:2}}%</span></h1>
+        {% endif %}
+        <h1 class="font-bold flex flex-col">Rank: <span class="font-light">{{CoinInfo.market_cap_rank}}</span></h1>
+        <h1 class="font-bold flex flex-col">Total Volume: <span class="font-light">{{CoinInfo.total_volume|intcomma}}</span></h1>
+      </div>
+      <div>
+        <h1 class="font-bold flex flex-col">Circulating Supply: <span class="font-light">{{CoinInfo.circulating_supply|intcomma}}</span></h1>
+        <h1 class="font-bold flex flex-col">High 24h: <span class="font-light text-green-600">${{CoinInfo.high_24h|intcomma}}</span></h1>
+        <h1 class="font-bold flex flex-col">Low 24h: <span class="font-light text-red-600">${{CoinInfo.low_24h|intcomma}}</span></h1>
+        <h1 class="font-bold flex flex-col">Last Updated: <span class="font-light">{{CoinInfo.last_updated.0}},</span></h1>
+        <h1 class="font-light text-xs md:text-base text-slate-600">{{CoinInfo.last_updated.1}}</h1>
+      </div>
+    </div>
+  </div>
+  <div class="chart mt-10">
+    <div id="chartContainer" style="height: 360px; width: 100%; position: relative; z-index: -1"></div>
+    <p class="font-bold text-sm md:text-xl text-blue-600 mt-2">DRAG TO ZOOM IN</p>
+  </div>
+  <div class="flex items-center justify-center mt-[5rem]">
+    {% if request.user.is_authenticated %}
+      <a class="bg-[#E6A54B] px-5 py-2 text-xl text-white rounded-full" onclick="addToWishlist('{{ CoinInfo.name }}', '{{ CoinInfo.image }}','{{CoinInfo.current_price}}');">Add to Watchlist</a>
+    {% else %}
+      <a href="/user/signin" class="bg-[#E6A54B] px-5 py-2 text-xl text-white rounded-full">Add to Watchlist</a>
+    {% endif %}
+  </div>
+</div>
+  <script src="https://cdn.canvasjs.com/ga/canvasjs.min.js"></script>
+{% endblock %}

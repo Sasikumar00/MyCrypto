@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static "/favicon.ico" %}" type="image/x-icon">
+    <title>MyCrypto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    {% block head %}
+    {% endblock %}
+</head>
+<body class="font-mono">
+  <div id="target-overlay" class="hidden fixed flex items-center justify-center w-full h-full backdrop-blur-sm">
+    
+  </div>
+    <nav class="bg-gray-800">
+        <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+          <div class="relative flex h-16 items-center justify-between">
+            <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
+              <!-- Mobile menu button-->
+              <button type="button" class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" aria-controls="mobile-menu" aria-expanded="false">
+                {% comment %} <span class="absolute -inset-0.5"></span>
+                <span class="sr-only">Open main menu</span> {% endcomment %}
+                <!--
+                  Icon when menu is closed.
+      
+                  Menu open: "hidden", Menu closed: "block"
+                -->
+                <svg id="ham" class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+                <!--
+                  Icon when menu is open.
+      
+                  Menu open: "block", Menu closed: "hidden"
+                -->
+                <svg id="ham-close" class="hidden h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+              <div class="flex flex-shrink-0 items-center">
+                <a href="/"><img class="h-8 w-auto" src="{% static '/favicon.png' %}" alt="Your Company"></a>
+              </div>
+              <div class="hidden sm:flex sm:flex-row sm:items-center sm:justify-between sm:ml-6 sm:block w-full">
+                <div class="flex space-x-4">
+                  <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
+                  <a href="/" class="hover:text-white text-gray-300 rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-700">Home</a>
+                  <a href="/about" class="hover:text-white text-gray-300 hover:bg-gray-700 rounded-md px-3 py-2 text-sm font-medium">About</a>
+                  {% if request.user.is_authenticated %}
+                  <a href="/get-watchlist" class="hover:text-white text-gray-300 hover:bg-gray-700 rounded-md px-3 py-2 text-sm font-medium">Watchlist</a>
+                  {% endif %}
+                  <a href="/pricing" class="hover:text-white text-gray-300 hover:bg-gray-700 rounded-md px-3 py-2 text-sm font-medium">Pricing</a>
+                </div>
+                <div>
+                    {% if request.user.is_authenticated %}
+                    <a href="/user/logout" class="hover:text-white text-gray-300 rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-700">Log out</a>
+                    {% else %}
+                    <a href="/user/signin" class="hover:text-white text-gray-300 rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-700">Sign In</a>
+                    <a href="/user/signup" class="hover:text-white text-gray-300 rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-700">Register</a>
+                    {% endif %}
+                </div>
+            </div>
+          </div>
+        </div>
+      
+        <!-- Mobile menu, show/hide based on menu state. -->
+        <div class="absolute left-[-500px] w-full bg-gray-800 sm:hidden h-[100vh] transition-all ease-in-out duration-300" id="mobile-menu">
+          <div class="flex flex-col text-xl space-y-1 px-2 pb-3 pt-2">
+            <a href="/" class="hover:text-white text-gray-300 rounded-md px-3 py-2 font-medium hover:bg-gray-700">Home</a>
+            <a href="/about" class="hover:text-white text-gray-300 hover:bg-gray-700 rounded-md px-3 py-2 font-medium">About</a>
+            {% if request.user.is_authenticated %}
+            <a href="/get-watchlist" class="hover:text-white text-gray-300 hover:bg-gray-700 rounded-md px-3 py-2 font-medium">Watchlist</a>
+            {% endif %}
+            <a href="/pricing" class="hover:text-white text-gray-300 hover:bg-gray-700 rounded-md px-3 py-2 font-medium">Pricing</a>
+            {% if request.user.is_authenticated %}
+            <a href="/user/logout" class="hover:text-white text-gray-300 rounded-md px-3 py-2 font-medium hover:bg-gray-700">Log out</a>
+            {% else %}
+            <a href="/user/signin" class="hover:text-white text-gray-300 rounded-md px-3 py-2 font-medium hover:bg-gray-700">Sign In</a>
+            <a href="/user/signup" class="hover:text-white text-gray-300 rounded-md px-3 py-2 font-medium hover:bg-gray-700">Register</a>
+            {% endif %}
+          </div>
+        </div>
+      </nav>      
+      {% if messages %}
+    {% for message in messages %}
+        {% if 'alert' in message.tags %}
+            {% if 'success' in message.tags %}
+                <div id="alert-block" >
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                    <strong class="font-bold">{{message}}</strong>
+                    <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+                    <svg id="close-alert" class="fill-current h-6 w-6 text-green-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+                    </span>
+                </div>
+                </div>
+            {% else %}
+                <div id="alert-block" >
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <strong class="font-bold">{{message}}</strong>
+                    <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+                    <svg id="close-alert" class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+                    </span>
+                </div>
+                </div>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    {% endif %}
+    <div class="min-h-[80vh] mb-10">
+        {% block content %}
+        {% endblock %}
+    </div>
+<footer class="w-full bg-[#1F2937] h-[10rem]">
+
+</footer>
+<script>
+    let closeAlert = document.getElementById('close-alert');
+    let alertBlock = document.getElementById('alert-block');
+    closeAlert?.addEventListener('click',()=>{
+        alertBlock.innerHTML = ''
+    } )
+
+    let mobileMenu = document.getElementById('mobile-menu');
+    let openHam = document.getElementById('ham');
+    let closeHam = document.getElementById('ham-close');
+    openHam.addEventListener('click', ()=>{
+      mobileMenu.classList.remove('left-[-500px]');
+      mobileMenu.classList.add('left-0');
+      openHam.classList.add('hidden');
+      closeHam.classList.remove('hidden');
+    })
+    closeHam.addEventListener('click', ()=>{
+      mobileMenu.classList.add('left-[-500px]');
+      mobileMenu.classList.remove('left-0');
+      openHam.classList.remove('hidden');
+      closeHam.classList.add('hidden');
+    })
+</script>
+<script>
+  function closeTargetform(){
+    let targetOverlay = document.getElementById('target-overlay');
+    targetOverlay.innerHTML=""
+    targetOverlay.classList.add('hidden')
+  }
+  function addToWishlist(name, image, price) {
+      let targetOverlay = document.getElementById('target-overlay');
+      targetOverlay.classList.remove('hidden');
+      var htmlContent = `
+          <div id='target-form-div' class="relative z-99 flex flex-col bg-gray-800 rounded-md px-10 pb-10 py-5 flex items-center justify-center text-white">
+            <div onclick="closeTargetform()">
+              <svg id="target-close" class="cursor-pointer z-10 absolute top-3 right-3 h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
+              <div class="flex items-center justify-center">
+                  <img class="w-[4rem]" src=${image} alt=${name}>
+                  <h1 class="ml-5 text-3xl font-bold">${name}</h1>
+              </div>
+              <h1 class="font-bold">Current Price: <span class="font-light text-green-600">$${price}</span></h1>
+              <form action="/add-to-watchlist/" method="post" class="flex flex-col text-xl" id="target-form">
+                {% csrf_token %} 
+                <input type="text" class="hidden" value=${name} name="coinname">
+                <input type="text" class="hidden" value=${image} name="coinimg">
+                  <label class="flex flex-col" for="target">
+                      <p class="font-bold my-3">Target($):</p>
+                      <input class="text-gray-600 text-xl px-2 py-1 rounded-sm placeholder:text-gray-600" type="text" name="target" placeholder="target price" required="true">
+                  </label>
+                  <label class="flex flex-col" for="type">
+                      <p class="font-bold my-3">Target Type:</p>
+                      <select class="px-2 py-1 rounded-md text-gray-600" name="type" id="type" form="target-form">
+                          <option value="bullish">Bullish</option>
+                          <option value="bearish">Bearish</option>
+                      </select>
+                  </label>
+                  <button class="bg-[#E6A54B] mt-6 px-4 py-1 rounded-md" type="submit">Add to watchlist</button>
+              </form>
+          </div>
+      `;
+      targetOverlay.innerHTML = htmlContent;
+  }
+</script>
+</body>
+</html>

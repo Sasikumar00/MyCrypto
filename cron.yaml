@@ -1,0 +1,7 @@
+version: 1
+cron:
+  - name: "crypto-target-check"
+    url: "./manage.py"
+    # schedule: "0 * * * *"
+    schedule: "* * * * *"
+    command: "source /var/app/venv/staging-LQM1lest/bin/activate && python manage.py check_crypto_targets"
